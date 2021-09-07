@@ -1,0 +1,140 @@
+Day 1
+
+Ansible from redhat
+1) ansible for Linux Admins   --- RH294   ( DO407 )
+      Linux admin III
+     EX294 
+
+  RHCSA in RHEL8 ( RH124 , RH134  , RH199 )
+  RHCE and Ansible Admin 
+
+2) Ansible for Windows Admin  ---- DO417
+
+3) Ansible for Network Admin ---- DO457
+
+4) Ansible Best Practice level 2 of Ansible  --- DO447 
+    advance ansible + ansible Tower
+    EX447
+
+--------------------------------------------------------------------------
+Masood Ahmed
+9663124747
+masood@rpsconsulting.in
+RPS Consulting Pvt Ltd.
+Unix       Linux     Automation     	VSF/infoscale
+HPUX       redhat    shell scripting
+Solaris    Suse      Ansible
+
+
+2004
+2005  hp
+itc infotech 
+SLC
+RPS 2010
+
+=========================================
+Chapter 1
+
+? ansible
+automation tool
+
+
+modules : are ansible commands and each module has its attributes ( options are called attributes )
+ansible-doc -l 
+maximum modules are written using python lanaguage
+
+
+
+
+OS
+$ ls -l
+file1  copy as file2
+cp file1 file2
+$ ls -l
+
+man cp or info cp  or cp --help
+options
+cp -r , -i , -f , -v etc etc
+
+
+=======================================
+Chapter 2
+
+inventory 
+inventory managed the hosts entry ( managed hosts/nodes ) details
+   and it has two types 
+  1) static inventory
+  2) dynamic inventory
+
+by default one static inventory is  shipped with ansible
+  ls -l /etc/ansible/hosts
+
+components of static inventory file
+a) ungrouped hosts
+b) grouped hosts
+c) nested group
+
+creating the inventory file
+inventory file can be created any where in the dir structure with any name with or without extension
+
+-------------
+ansible.cfg    ( config file of ansible )
+default ansible.cfg will get created
+ls -l /etc/ansible/ansible.cfg  (3)
+
+.ansible.cfg  ( under home directory )   (2)
+   for all the sub directories under the home directory 
+
+ansible.cfg   (1)
+( current working directory )
+
+-------------------
+executing or running the ansible command
+1) adhoc command
+2) playbooks
+
+adhoc command
+simple tasks and one time task execution with out using play books
+
+playbooks
+repeate the tasks with set of ansible commands 
+
+-----------------------------------------------
+run the adhoc command to create a directory by name /oracle123 in serverb
+
+file ( module )
+
+os command with ansible
+
+command
+shell
+
+database
+xyz vendor
+
+/opt/xyz/upgrade
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

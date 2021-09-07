@@ -1,0 +1,271 @@
+day 4
+
+Chapter 8
+managing roles
+
+components of play book
+1) tasks   ( inside and out side the playbook )
+2) handlers ( inside and out side the playbook )
+3) vars ( inside and out side the playbook )
+4) templates ( out side the playbook )
+5) files ( out side the playbook )
+
+database project
+app1 						 app2 ( inventory , ansible.cfg )
+1. main play book           1
+2. tasks 		    8 ( outside )
+3. handlers		    4 ( outside )
+4. vars			    2 ( outside )
+5. templates		    3 ( outside )
+6. files		    1 ( outside )
+			  ----
+			   19 
+/home/user1/database
+ zip file
+playbook
+include_tasks : /home/user1/database/tasks/task1
+
+structure of directories 
+
+-----------------------------------------------------------------
+datacenter
+/home/user10/oracle-db  
+
+zip file ( extract )
+playbook ( alter the entire )
+include_tasks : /home/user1/database/tasks/task1
+----------------------------------------------
+roles
+I. create our own roles and deploy
+II. system defined roles ( install the role package )
+III. existing roles created by other ansible users from ansible galaxy
+
+---------------------------------------------------------------------
+deploy the apache web server on all the managed nodes by using the ansible galaxy role
+create the role by name web
+
+call the role in the playbook
+
+
+ans :
+1) create the web role
+ 
+
+managed node
+1) create the role directory
+2) copy the zip file and extract it
+3) modify the ansible.cfg file for the role path
+4) inventory file and ansible.cfg
+5) create the play book and add the role
+
+
+======================================
+II. system defined roles ( install the role package )
+
+$ sudo yum install rhel-system-roles -y
+
+update the ansible.cfg file for roles path
+
+open the roles directory ( ntp client -- chronyc )
+
+
+cd /usr/share/ansible/roles
+ cd rhel-system-roles.timesync
+
+
+========================
+vim web-data.yaml
+
+- name: Prepare the web server
+  import_playbook: web.yml         
+- name: Prepare the database server
+  import_playbook: db.yml
+
+:wq!
+
+$ ansible-playbook web-data.yaml
+
+-------------------
+calling tasks files
+cat test123.yml
+---
+- name : test file
+  hosts : servera.lab.example.com
+  remote_user : devops
+  become : true
+  roles:
+    - web
+
+
+[student@workstation playbooks]$ cat roles/web/tasks/main.yml
+---
+- include_tasks: task1.yml
+- include_tasks: task2.yml
+
+[student@workstation playbooks]$ ll roles/web/tasks/
+total 12
+-rw-rw-r--. 1 student student  59 Aug 27 12:27 main.yml
+-rw-rw-r--. 1 student student 540 Aug 27 10:35 task1.yml
+-rw-rw-r--. 1 student student  90 Aug 27 10:49 task2.yml
+
+---------------------
+selecting single tasks from the roles 
+
+---
+- name : using roles with task
+  hosts : serverb.lab.example.com
+  remote_user : devops
+  become : true
+  tasks:
+    - include_role:
+        name: data1
+        tasks_from: test1.task
+======================================
+local_action
+
+any task in the local machine ( controller node )
+
+1) execute the task in the conroller node
+  play1
+  hosts : < managed nodes>
+  ....
+  ...
+  
+ play2
+ hosts : localhost
+ tasks :
+ ....
+ ...
+
+2) local_action
+
+----------------------
+write a play to generate the managed node  software and hardware details and create a file report.csv in controller node in the current working directory
+
+
+1) copy or template
+    fetch ( to get files back )
+
+2) shell module to gather information
+    register : <variables>
+   local_action ( to create the report locally )
+
+ans :
+cat local_action.yaml
+---
+- name : Get OS version and details from servers
+  hosts : all
+  remote_user : devops
+  become : true
+  gather_facts : no
+  tasks :
+  - name : get hostname
+    shell : hostname
+    register : host_name
+  - name : get OS version
+    shell : cat /etc/redhat-release
+    register : os_version
+  - name : ip address
+    shell : ifconfig | grep -w inet | grep broadcast | awk '{ print $2 }'
+    register : ifconf_ip
+  - name : write output to file
+    local_action : shell echo '{{ host_name.stdout }}; {{ os_version.stdout }}; {{ ifconf_ip.stdout }}'  >> os_details.csv
+    become : false
+
+
+============================
+magic variables
+
+write a play book to create a directory by name /web-dir for the group webservers and
+/data-dir for groups data 
+
+ cat magic1.yaml
+---
+- name : using magic variables
+  hosts : all
+  remote_user : devops
+  become: true
+  tasks :
+  - name : create a directory /web-dir for webserver group
+    file :
+      path : /web-dir
+      state : directory
+    when : inventory_hostname in groups['webservers']
+
+  - name : create a directory /data-dir for data group
+    file :
+      path : /data-dir
+      state : directory
+    when :  inventory_hostname in groups['data']
+
+--------------------------------------------------
+when : inventory_hostname in ['<hostname>']
+
+---------------------------------------------
+
+interactive playbooks
+
+---
+- hosts: servera.lab.example.com
+  become: true
+  remote_user: devops
+
+  vars_prompt:
+    - name: "pkg"
+      prompt: "Enter the Package to install "
+      private: no
+  tasks :
+  - name : installing the "{{ pkg }}"
+    yum :
+      name : "{{ pkg }}"
+      state : latest
+
+----------------------
+menu driver
+
+---
+- name : Menu driven play book
+  hosts : servera.lab.example.com
+  remote_user : devops
+  become : true
+
+  vars_prompt :
+    - name : "options"
+      prompt :
+       "1 - hostname\n
+        2 - ipaddress\n
+        3 - free memory\n
+        Enter your choice for task\n "
+      private : no
+
+  tasks :
+    - name : display hostname
+      debug :
+        msg : "Hostname is {{ ansible_hostname }} "
+      when : (options == "1" )
+
+    - name : display the ipaddress
+      debug :
+        msg : "IP address is {{ ansible_default_ipv4.address }}"
+      when : (options == "2" )
+
+    - name : display the memory
+      debug :
+        msg : "free memory is {{ ansible_memfree_mb }}"
+      when : (options == "3" )
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+

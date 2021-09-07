@@ -1,0 +1,238 @@
+Day 2
+
+chapter 3
+pre-request of creating the playbooks
+1) select the editor 
+    vi , vim , nano , gedit , emacs etc etc
+  vim is more colorfull
+
+2) playbook file name 
+    play1.yaml or .yml  or not required
+not mandatory
+
+hosts : <manged node>
+
+ansible-playbook <playbook>
+
+better indentation we can tune or configure the vim editor whcih the 
+config file .vimrc ( does not existing by default ) we need to create under the home directory 
+
+1) cd 
+2) vim .vimrc
+   esc i
+   set ai
+   set et
+   set ts=2
+   set cursorcolumn
+esc :wq!
+3) cat .vimrc
+
+componets of play book
+1) host entry 
+2) privilage escalation and other setting
+3) tasks
+   module
+    atttributes
+ each task must start with - 
+
+--------------------------------------
+create a play book on servera with the below tasks
+1) create the directory by name /sap
+   module ( file )
+
+2) create a file my name welcome under the /sap directory with the contents "Welcome to ansible "
+    module ( copy )
+
+Ans :
+cat play1.yaml
+---
+- name : this is my first playbook
+  hosts : serverd.lab.example.com
+  tasks :
+  - name : creating the directory /sap
+    file:
+      path: /sap
+      state: directory
+
+  - name : create the file welcome under /sap directory
+    copy :
+      content : "Welcome to Ansible\n"
+      dest : /sap/welcome
+
+
+1) check the syntax 
+$ ansible-playbook --syntax-check play1.yaml
+
+2) run the play book in check mode or dry run mode
+ 
+$ ansible-playbook -C play1.yaml
+
+3) run the play book in normal mode
+$ ansible-playbook play1.yaml
+------------------
+ tasks :
+ - name : creating the directory /sap
+
+ tasks :
+   - name : creating the directory /sap
+
+
+------------------------------------------
+web.yaml      -- first
+
+check-web.yaml --- second
+
+
+web.yaml
+
+second play 
+for another tasks
+===========================================
+Chapter 4
+I. using variables
+   1) user defined variables 
+   2) ansible facts ( default or global variables of Ansible )
+
+II. ansible-vault
+     encryption
+
+1) user defined variables 
+   a) with in the play books
+      vars:
+   b) defining varaibles out side the play book
+      vars_files:
+ 
+usign the variables in the inventory
+ansible_user=admin
+ansible_ssh_pass=redhat
+
+2) ansible facts ( default or global variables of Ansible )
+facts can be discover to get the software and hardware details of both controller and managed nodes by using the setup module with adhoc command on the screen
+or the variables can be used in the play book
+
+all the ansible facts starts with ansible_*_
+
+=========================================
+write a play book to  create the server report for web group with the following details
+1) fqdn    : ansible_fqdn
+2) OS version : ansible_distribution
+3) total memory : ansible_memtotal_mb
+4) total cpu's : ansible_processor_count
+and store the file under /opt/server.txt
+
+Ans :
+  cat facts-report.yaml
+---
+- name : using facts to generate the server report
+  hosts : web
+  remote_user : devops
+  become  : true
+  tasks :
+  - name  : creating the server report
+    copy :
+      content : "fqdn    : {{ ansible_fqdn }}\n OS version : {{ ansible_distribution }}\n
+                  total memory : {{ ansible_memtotal_mb }}\n  Total cpu's : {{ ansible_processor_count }}\n"
+      dest : /opt/server.txt
+====================================================================
+Chapter 5
+
+loops
+
+write a playbook to implement the web server on servera.lab.example.com 
+a) install the httpd and firewalld packages
+b) start the httpd and firewalld packages
+c) create the index.html file /var/www/html
+d) add the http service in firewalld 
+
+
+Ans :
+cat web-loop.yaml
+---
+- name : deploy the apache web server
+  hosts : all
+  remote_user : devops
+  become : true
+  vars:
+    apache_firwall:
+      - httpd
+      - firewalld
+  tasks :
+  - name : install the httpd and firewalld pacakges
+    yum :
+      name : "{{ item }}"
+      state : latest
+    loop : "{{ apache_firwall }}"
+
+  - name : starting the services
+    service :
+      name : "{{ item }}"
+      state : started
+      enabled : true
+    loop : "{{ apache_firwall }}"
+
+  - name : creating the index.html file under /var/www/html
+    copy :
+      content : "Welcome {{ ansible_fqdn }} to Ansible Automation !!!!\n"
+      dest : /var/www/html/index.html
+
+  - name : add the http service in firewalld
+    firewalld :
+      service: http
+      permanent: yes
+      state: enabled
+      immediate : yes
+
+------------------------------------
+register  and debug
+
+register : is reserved statment to assign variable to capture the output of tasks and store into the variable for print and trouble shooting purpose
+
+
+ cat register-debug.yaml
+---
+- name : this is my first playbook
+  hosts : serverc.lab.example.com
+  gather_facts : no
+  tasks :
+  - name : creating the directory /abc123
+    file:
+      path: /abc123
+      state: directory
+    register : a1
+
+  - debug :
+      var : a1
+
+  - name : create the file welcome under /abc123 directory
+    copy :
+      content : "Welcome to Ansible\n"
+      dest : /abc123/welcome
+
+  - debug :
+      msg : "End of Play book "
+
+
+-------------------------------------------------
+running the task conditionally ( the below pattern are not supported in play book ) 
+use the when statement
+if < condtion>
+ then
+  .....
+  ....
+else
+   .....
+   .....
+fi
+
+when 
+
+
+-------------
+ansible facts
+
+list of dict 
+arrays variables
+sub or chlid variables
+
+
+

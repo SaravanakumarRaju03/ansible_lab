@@ -1,0 +1,188 @@
+Day 3
+
+chapter 5 continues .....
+
+handlers
+
+run the task conditionaly with out using the when statement
+
+notify , handlers
+
+-------------
+write a play book to execute on servera 
+1) copy the httpd.conf from controller node  to servera under /etc/httpd/conf/httpd.conf
+   if any config changes reported then
+2) restart the apache web services
+
+Ans :
+
+$ scp root@servera:/etc/httpd/conf/httpd.conf .
+
+cat handlers1.yaml
+---
+- name : using handlers to update the httpd.conf file
+  hosts : servera.lab.example.com
+  remote_user : devops
+  become : true
+  tasks :
+  - name : copy the httpd.conf file
+    copy :
+      src: httpd.conf
+      dest: /etc/httpd/conf/httpd.conf
+    notify : apache
+
+  handlers :
+  - name : apache
+    service :
+      name : httpd
+      state : restarted
+      enabled : yes
+-----------------------------
+if <condition>  block
+ then
+  ....
+else            rescue
+   ......
+fi
+......          always
+.....
+
+-------------------------------------------------
+write a playbook for serverb 
+1) downlaod the file access.html from classroom system
+   http://classroom/access.html under /var/www/html
+if download failed
+2) create the file error.html undr /var/www/html  with contents "error in downlaod"
+3) restart the httpd service always 
+
+cat block-rescue.yaml
+---
+- name : using block , rescue and always
+  hosts : serverb.lab.example.com
+  remote_user : devops
+  become : true
+  tasks :
+  - block :
+    - name : downlaod the access.html file from http://classroom
+      get_url:
+        url: http://classroom/access.html
+        dest: /var/www/html/access.html
+
+    rescue :
+    - name : create the error.html file
+      copy :
+        content : " Error downlaoding the file\n"
+        dest : /var/www/html/error.html
+
+    always :
+    - name : restart the httpd service
+      service :
+        name : httpd
+        state : restarted
+        enabled : yes
+
+----------------------
+scp 
+rsync
+
+file1
+file2   --- updated
+file3
+file4
+file5
+
+scp or rsync  
+
+rsync
+file2
+file4
+file5
+----------------------------------------------
+? SElinux
+
+SE ( Security Enhanced )
+
+unix -- close source    
+linux  --- open source
+
+secure by default 
+
+httpd service
+web server
+/var/www/html
+
+/myweb  - 777
+
+edit config file
+
+/myweb   --- add under selinux
+
+80
+
+82
+
+/etc/hosts
+<ip add>  <fqdn>  <hsotname>
+
+
+----------------------------
+Chapter 7
+
+host pattern
+
+hosts : <......>    ( inventory file a) static and dynamic )  --- ansible.cfg
+
+two special group ( we have not mentioned in the inventory file )
+a) all  ( it refrers all the hosts )
+b) ungrouped ( not the part of any group --- individual hosts or ips )
+
+
+hosts : servera.lab.example.com   !serverc.lab.example.com  emc
+
+hosts : 'web,!servera'
+hosts : '!servera,web'
+
+
+web
+servera
+serverc
+serverf
+
+hosts :
+ - servera
+ - serverc
+ - web
+
+hosts : [servera ]
+
+---------------------------------
+DO407
+EX407
+
+---------------------------
+RH294
+EX294
+
+RHCSA  in rhel8
+RHCE , ansible 
+
+
+ansible 
+RHCSA 
+RHCE
+
+DO447
+EX447
+
+19k 
+free retake
+
+remote
+
+
+
+
+
+
+
+
